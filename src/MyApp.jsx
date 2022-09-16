@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Avatar,
   ShellBar,
@@ -11,8 +11,7 @@ import {
   TableColumn,
   Label,
   TableCell,
-  TableRow,
-  FileUploader,
+  TableRow
 } from "@ui5/webcomponents-react";
 import { spacing } from "@ui5/webcomponents-react-base";
 import { DonutChart, LineChart } from "@ui5/webcomponents-react-charts";
@@ -20,7 +19,8 @@ import "@ui5/webcomponents-icons/dist/line-chart.js";
 import "@ui5/webcomponents-icons/dist/donut-chart.js";
 import "./index.css";
 import axios from "axios";
-import exceljs from 'exceljs'
+import { utils, writeFile } from "xlsx";
+import { useSelector } from "react-redux";
 
 export function MyApp() {
   const dataset = [
@@ -54,25 +54,40 @@ export function MyApp() {
     },
   ];
 
-  const dataJSON = [];
-  for (let i = 0; i <= 500; i++) {
-    dataJSON.push({
-      test: `1${i}`
-    });
-  }
-
   const [toggleCharts, setToggleCharts] = useState("lineChart");
   const [loading, setLoading] = useState(false);
   const [dataTable, setData] = useState([]);
-  const [dataExcel, setDataExcel] = useState(dataJSON);
+  const data = useSelector((state) => state.reportService);
 
-  const onDownloadFile = () => {
-    setDataExcel(dataJSON);
-    console.log(dataExcel);
+  // const onDownloadFile = async () => {
+  //   setDataExcel(dataJSON);
 
-    const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet("TestDiarSheet");
-  };
+  //   const workbook = new exceljs.Workbook();
+  //   const worksheet = workbook.addWorksheet("TestDiarSheet");
+
+  //   const jsonKeys = Object.keys(dataExcel[0]);
+  //   const columns = [];
+
+  //   jsonKeys.map(function (name, i) {
+  //     columns.push({ header: name, key: name, width: 10 });
+  //   });
+
+  //   worksheet.columns = columns;
+
+  //   dataExcel.forEach(function (row) {
+  //     worksheet.addRow(row);
+  //   });
+
+  //   // await workbook.xlsx.writeFile("export.xlsx");
+  //   await workbook.xlsx
+  //     .writeBuffer("sample.xlsx")
+  //     .then(() => {
+  //       console.log("saved");
+  //     })
+  //     .catch((err) => {
+  //       console.log("err", err);
+  //     });
+  // };
 
   const handleHeaderClick = () => {
     if (toggleCharts === "lineChart") {
@@ -114,6 +129,25 @@ export function MyApp() {
 
     return fetchData;
   };
+
+  const onDownloadFile = () => {
+    var wb = utils.book_new();
+    var ws = utils.json_to_sheet(memoData);
+
+    utils.book_append_sheet(wb, ws, "MySabana1");
+
+    writeFile(wb, "MyExcel.xlsx");
+  };
+
+  const memoData = useMemo(() => {
+    const dataJSON = [];
+    for (let i = 0; i <= 500; i++) {
+      dataJSON.push({
+        AUResale: `X`
+      });
+    }
+    return dataJSON;
+  }, []);
 
   return (
     <div>
